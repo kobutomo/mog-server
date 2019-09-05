@@ -1,0 +1,19 @@
+{
+  "name": "mog-server",
+  "version": "1.0.0",
+  "description": "mogmogram server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tomoro nishida",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^7.12.1",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.2.18"
+  },
+  "devDependencies": {
+    "@types/pg": "^7.11.1"
+  }
+}
