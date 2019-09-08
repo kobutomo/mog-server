@@ -6,17 +6,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "creating": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
-    "runnig": "ts-node ./node_modules/typeorm/cli.js migration:run"
+    "running": "ts-node ./node_modules/typeorm/cli.js migration:run"
   },
   "author": "tomoro nishida",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "pg": "^7.12.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.18",
     "typescript": "^3.6.2"
   },
   "devDependencies": {
+    "@types/express": "^4.17.1",
     "@types/pg": "^7.11.1",
     "ts-loader": "^6.0.4",
     "webpack": "^4.39.3",
