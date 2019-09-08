@@ -2,17 +2,14 @@ import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm'
 
 @Entity()
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  public id: number = 0
+  @PrimaryGeneratedColumn("uuid")
+  public id: string
+
+  @Column({ unique: true })
+  public login: string
 
   @Column()
-  public name: string = ''
-
-  @Column()
-  public age: number = 0
-
-  @Column()
-  public gender: string = ''
+  public password: string
 }
 
 export default User
