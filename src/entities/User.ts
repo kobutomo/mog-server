@@ -10,4 +10,7 @@ export class User extends BaseEntity {
 
   @Column()
   public password: string
+
+  @Column()
+  public delete: boolean = false
 }

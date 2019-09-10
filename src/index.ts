@@ -23,7 +23,9 @@ createConnection().then(async (connection) => {
 
   // user一覧を閲覧
   app.get('/read', async (req, res) => {
-    const users = await User.find({})
+    const users = await User.find({
+      delete: false
+    })
 
     if (users) {
       res.send(users)
@@ -35,11 +37,11 @@ createConnection().then(async (connection) => {
 
   // 接続するたびひとつuserを削除
   app.get('/delete', async (req, res) => {
-    const users = await User.findOne({})
-
-    if (users) await users.remove()
-    if (users) {
-      res.send(users)
+    const user = await User.findOne({})
+    if (user) {
+      user.delete = true
+      await User.save(user)
+      res.send(user)
     }
     else {
       res.send("no such user")
