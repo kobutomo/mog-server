@@ -13,7 +13,6 @@ createConnection().then(async (connection) => {
 
     // パスワード暗号化
     const hasedPassword = await bcrypt.hash('0000', 10)
-    user.id = 6
     // Math.random()についてはランダムにしたいだけ
     user.login = 'adimn' + Math.random().toString()
     user.password = hasedPassword
@@ -50,7 +49,9 @@ createConnection().then(async (connection) => {
 
 
   app.get('/compare', async (req, res) => {
-    const users = await User.find()
+    const users = await User.find({
+      delete: false
+    })
 
     if (users) {
       // 正しく暗号化されてるかテストしたい
