@@ -12,7 +12,7 @@ export class createDetail1567935843939 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "user" ADD "password" character varying NOT NULL`);
         await queryRunner.query(`ALTER TABLE "user" DROP CONSTRAINT "PK_cace4a159ff9f2512dd42373760"`);
         await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "id"`);
-        await queryRunner.query(`ALTER TABLE "user" ADD "id" uuid NOT NULL DEFAULT uuid_generate_v4()`);
+        await queryRunner.query(`ALTER TABLE "user" ADD "id" serial NOT NULL`);
         await queryRunner.query(`ALTER TABLE "user" ADD CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id")`);
     }
 
