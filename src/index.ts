@@ -8,7 +8,7 @@ createConnection().then(async (connection) => {
   const app = express()
 
   // 接続するたびuserを追加
-  app.get('/', async (req, res) => {
+  app.get('/api/', async (req, res) => {
     const user = new User()
 
     // パスワード暗号化
@@ -21,7 +21,7 @@ createConnection().then(async (connection) => {
   })
 
   // user一覧を閲覧
-  app.get('/read', async (req, res) => {
+  app.get('/api/read', async (req, res) => {
     const users = await User.find({
       delete: false
     })
@@ -35,7 +35,7 @@ createConnection().then(async (connection) => {
   })
 
   // 接続するたびひとつuserを削除
-  app.get('/delete', async (req, res) => {
+  app.get('/api/delete', async (req, res) => {
     const user = await User.findOne({})
     if (user) {
       user.delete = true
@@ -48,7 +48,7 @@ createConnection().then(async (connection) => {
   })
 
 
-  app.get('/compare', async (req, res) => {
+  app.get('/api/compare', async (req, res) => {
     const users = await User.find({
       delete: false
     })
