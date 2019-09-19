@@ -20,27 +20,30 @@ createConnection().then(async (connection) => {
     // パスワード暗号化
     const hasedPassword = await bcrypt.hash('0000', 10)
     // Math.random()についてはランダムにしたいだけ
-    user.login = 'adimn' + Math.random().toString()
+    user.email = 'adimn' + Math.random().toString()
     user.password = hasedPassword
     await User.save(user)
     res.send(user.id.toString())
   })
 
-  app.get('/api/create/', async (req, res) => {
+  app.post('/api/create/', async (req, res) => {
     const user = new User()
 
     // パスワード暗号化
-    const hasedPassword = await bcrypt.hash('0000', 10)
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
     // Math.random()についてはランダムにしたいだけ
-    user.login = 'admin'
-    user.password = hasedPassword
-    await User.save(user)
-    res.send(user.id.toString())
+    user.email = req.body.email
+    user.password = hashedPassword
+    await User.save(user).then(() => {
+      res.json({ created: true })
+    }).catch(() => {
+      res.json({ created: false })
+    })
   })
 
   app.post("/api/login/", async (req, res) => {
     const user = await User.findOne({
-      login: req.body.account
+      email: req.body.email
     })
     // アカウントが存在したときの処理
     if (user) {
@@ -57,6 +60,20 @@ createConnection().then(async (connection) => {
     // アカウントが存在しないとき
     else {
       res.json({ auth: false })
+    }
+  })
+
+  // email被りチェック
+  app.post("/api/checkemail/", async (req, res) => {
+    const user = await User.findOne({
+      email: req.body.email
+    })
+
+    if (user) {
+      res.json({ exists: true })
+    }
+    else {
+      res.json({ exists: false })
     }
   })
 

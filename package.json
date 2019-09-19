@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "creating": "ts-node ./node_modules/typeorm/cli.js migration:generate -n",
-    "running": "ts-node ./node_modules/typeorm/cli.js migration:run"
+    "running": "ts-node ./node_modules/typeorm/cli.js migration:run",
+    "start": "ts-node ./src/index.ts"
   },
   "author": "tomoro nishida",
   "license": "ISC",
