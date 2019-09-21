@@ -4,9 +4,12 @@ import 'reflect-metadata';
 import bcrypt from "bcrypt"
 import { User } from './entities/User'
 import { getConnectionOptions, createConnection, BaseEntity } from 'typeorm'
+import jwt from "jsonwebtoken"
+import config from "./config"
 
 createConnection().then(async (connection) => {
   const app = express()
+
 
   app.use(bodyParser.urlencoded({
     extended: true
@@ -34,8 +37,19 @@ createConnection().then(async (connection) => {
     // Math.random()についてはランダムにしたいだけ
     user.email = req.body.email
     user.password = hashedPassword
-    await User.save(user).then(() => {
-      res.json({ created: true })
+    const payload = {
+      user_id: req.body.email
+    }
+    const token = jwt.sign(payload, config.jwtKey)
+    user.token = token
+
+    // 登録が成功したら
+    await User.save(user).then(user => {
+      // token発行処理
+      res.json({
+        created: true,
+        token: token
+      })
     }).catch(() => {
       res.json({ created: false })
     })
