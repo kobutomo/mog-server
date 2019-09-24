@@ -3,32 +3,44 @@ import bodyParser from 'body-parser'
 import 'reflect-metadata';
 import bcrypt from "bcrypt"
 import { User } from './entities/User'
-import { getConnectionOptions, createConnection, BaseEntity } from 'typeorm'
+import { createConnection } from 'typeorm'
 import jwt from "jsonwebtoken"
 import config from "./config"
 
+// どうしてもtry/catchを書きたくなかった
+const verifyToken = async (token: string, secret: string) => {
+  return jwt.verify(token, secret)
+}
+
 createConnection().then(async (connection) => {
   const app = express()
-
 
   app.use(bodyParser.urlencoded({
     extended: true
   }))
   app.use(bodyParser.json())
 
-  // 接続するたびuserを追加
-  app.get('/api/', async (req, res) => {
-    const user = new User()
 
-    // パスワード暗号化
-    const hasedPassword = await bcrypt.hash('0000', 10)
-    // Math.random()についてはランダムにしたいだけ
-    user.email = 'adimn' + Math.random().toString()
-    user.password = hasedPassword
-    await User.save(user)
-    res.send(user.id.toString())
+  // email被りチェック
+  app.post("/api/checkemail/", async (req, res) => {
+    const user = await User.findOne({
+      email: req.body.email
+    })
+
+    if (user) {
+      res.json({ exists: true })
+    }
+    else {
+      res.json({ exists: false })
+    }
   })
 
+  app.get('/api/', async (req, res) => {
+    res.send("welcome to Mogserver")
+  })
+
+
+  // 新規ユーザー登録
   app.post('/api/create/', async (req, res) => {
     const user = new User()
 
@@ -38,7 +50,7 @@ createConnection().then(async (connection) => {
     user.email = req.body.email
     user.password = hashedPassword
     const payload = {
-      user_id: req.body.email
+      user_email: req.body.email
     }
     const token = jwt.sign(payload, config.jwtKey)
     user.token = token
@@ -55,6 +67,8 @@ createConnection().then(async (connection) => {
     })
   })
 
+
+  // ログイン処理
   app.post("/api/login/", async (req, res) => {
     const user = await User.findOne({
       email: req.body.email
@@ -77,22 +91,47 @@ createConnection().then(async (connection) => {
     }
   })
 
-  // email被りチェック
-  app.post("/api/checkemail/", async (req, res) => {
-    const user = await User.findOne({
-      email: req.body.email
-    })
 
-    if (user) {
-      res.json({ exists: true })
+  /* JWT検証
+  ユーザー認証が必要ないAPIはこれより上に記述しないと弾かれる */
+  app.use(async (req, res, next) => {
+
+    const token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+    // トークンがあるかどうか検証
+    if (!token) {
+      return res.status(403).send({
+        success: false,
+        message: 'No token provided.'
+      });
     }
-    else {
-      res.json({ exists: false })
-    }
+
+    await verifyToken(token, config.jwtKey).then((result: any) => {
+      if (result.user_id) {
+        /* decodeして取得したemailをリクエストbodyに加える
+        そうすることで、next()で続くmiddleware上でメールアドレスを使用できる */
+        req.body.emailForJWT = result.user_id
+        next()
+        // メールアドレスを取得できなかったとき
+      } else {
+        return res.status(403).send({
+          success: false,
+          message: 'Invalid token.'
+        })
+      }
+      // JWTの検証に失敗したとき
+    }).catch(() => {
+      return res.status(403).send({
+        success: false,
+        message: 'Invalid token.'
+      })
+    })
   })
+
 
   // user一覧を閲覧
   app.get('/api/read', async (req, res) => {
+    console.log(req.body.emailForJWT)
     const users = await User.find({
       delete: false
     })
@@ -117,31 +156,6 @@ createConnection().then(async (connection) => {
       res.send("no such user")
     }
   })
-
-
-  app.get('/api/compare', async (req, res) => {
-    const users = await User.find({
-      delete: false
-    })
-
-    if (users) {
-      // 正しく暗号化されてるかテストしたい
-      const getResults = async () => {
-        let results: boolean[] = []
-        for (let i = 0; i < users.length; i++) {
-          const result = await bcrypt.compare("0000", users[i].password)
-          results.push(result)
-        }
-        return results
-      }
-
-      res.send(await getResults())
-    }
-    else {
-      res.send("no such user")
-    }
-  })
-
 
   app.listen(4000, () => console.log('Example app listening on port 4000!'))
 
