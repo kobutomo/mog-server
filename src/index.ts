@@ -81,7 +81,6 @@ createConnection().then(async (connection) => {
     const user = await User.findOne({
       email: req.body.email
     })
-    
     // アカウントが存在したときの処理
     if (user) {
       // 暗号化比較
