@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Column, BaseEntity } from 'typeorm'
 
 @Entity()
 export class User_Detail extends BaseEntity {
@@ -11,11 +11,17 @@ export class User_Detail extends BaseEntity {
   @Column()
   public age: number
 
-  @Column({ unique: true })
-  public email: string
-
   @Column()
   public greeting: string
+
+  @CreateDateColumn()
+  readonly createdAt?: Date
+
+  @UpdateDateColumn()
+  readonly updatedAt?: Date
+
+  @Column()
+  public delete: boolean = false
 }
 
 export default User_Detail

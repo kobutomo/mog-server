@@ -49,18 +49,26 @@ createConnection().then(async (connection) => {
     // Math.random()についてはランダムにしたいだけ
     user.email = req.body.email
     user.password = hashedPassword
-    const payload = {
-      user_email: req.body.email
-    }
-    const token = jwt.sign(payload, config.jwtKey)
-    user.token = token
+    user.token = "temptoken"
 
     // 登録が成功したら
-    await User.save(user).then(user => {
+    await User.save(user).then(async (result) => {
       // token発行処理
-      res.json({
-        created: true,
-        token: token
+      const payload = {
+        USER_ID: result.user_id
+      }
+      const token = jwt.sign(payload, config.jwtKey)
+
+      // 先ほど登録したユーザーにトークンを付与
+      result.token = token
+      await User.save(result).then(() => {
+        res.json({
+          created: true,
+          token: token
+        })
+      }).catch(() => {
+        User.remove(result)
+        res.json({ created: false })
       })
     }).catch(() => {
       res.json({ created: false })
@@ -107,10 +115,10 @@ createConnection().then(async (connection) => {
     }
 
     await verifyToken(token, config.jwtKey).then((result: any) => {
-      if (result.user_id) {
+      if (result.USER_ID) {
         /* decodeして取得したemailをリクエストbodyに加える
         そうすることで、next()で続くmiddleware上でメールアドレスを使用できる */
-        req.body.emailForJWT = result.user_id
+        req.body.USER_ID = result.USER_ID
         next()
         // メールアドレスを取得できなかったとき
       } else {
@@ -131,7 +139,7 @@ createConnection().then(async (connection) => {
 
   // user一覧を閲覧
   app.get('/api/read', async (req, res) => {
-    console.log(req.body.emailForJWT)
+    console.log(req.body.USER_ID)
     const users = await User.find({
       delete: false
     })
