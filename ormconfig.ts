@@ -1,4 +1,6 @@
 import { User } from './src/entities/User'
+import { UserDetail } from './src/entities/UserDetail'
+import { Post } from './src/entities/Post'
 module.exports = {
   "type": "postgres",
   "host": "localhost",
@@ -9,7 +11,9 @@ module.exports = {
   "synchronize": false,
   "logging": false,
   "entities": [
-    User
+    User,
+    UserDetail,
+    Post
   ],
   "migrations": [
     __dirname + "/src/db/migrations/**/*.ts"

@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Column, BaseEntity } from 'typeorm'
 
 @Entity()
-export class User_Detail extends BaseEntity {
+export class UserDetail extends BaseEntity {
   @PrimaryGeneratedColumn()
   public user_id: number
 
@@ -24,4 +24,4 @@ export class User_Detail extends BaseEntity {
   public delete: boolean = false
 }
 
-export default User_Detail
+export default UserDetail

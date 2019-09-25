@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm'
 
 @Entity()
-export class User extends BaseEntity {
+export class Post extends BaseEntity {
 	@PrimaryGeneratedColumn("increment")
 	readonly post_id?: number
 
@@ -14,13 +14,13 @@ export class User extends BaseEntity {
 	@Column()
 	public content: string
 
-	@Column()
+	@Column("text", { array: true })
 	public images: string[]
 
 	@Column()
 	public rating: number
 
-	@Column()
+	@Column("text", { array: true })
 	public tags: string[]
 
 	@CreateDateColumn()

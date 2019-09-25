@@ -57,7 +57,7 @@ createConnection().then(async (connection) => {
       const payload = {
         USER_ID: result.user_id
       }
-      const token = jwt.sign(payload, config.jwtKey)
+      const token = jwt.sign(payload, config.jwtKey, { expiresIn: "1d" })
 
       // 先ほど登録したユーザーにトークンを付与
       result.token = token
@@ -86,7 +86,13 @@ createConnection().then(async (connection) => {
       // 暗号化比較
       const result = await bcrypt.compare(req.body.password, user.password)
       if (result) {
-        res.json({ auth: true })
+        // token更新
+        const payload = {
+          USER_ID: user.user_id
+        }
+        const token = jwt.sign(payload, config.jwtKey, { expiresIn: "1d" })
+
+        res.json({ auth: true, token: token })
       }
       // PWが違うとき
       else {
