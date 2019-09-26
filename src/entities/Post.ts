@@ -2,11 +2,11 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 @Entity()
 export class Post extends BaseEntity {
-	@PrimaryGeneratedColumn("increment")
-	readonly post_id?: number
+	@PrimaryGeneratedColumn()
+	readonly user_id: number
 
-	@Column()
-	public user_id: number
+	@Column("increment")
+	public post_id?: number
 
 	@Column()
 	public title: string
