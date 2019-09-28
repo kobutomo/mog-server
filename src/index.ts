@@ -147,8 +147,17 @@ createConnection().then(async (connection) => {
   // user一覧を閲覧
   app.get('/api/read', async (req, res) => {
     console.log(req.body.USER_ID)
-    const users = await User.findOne({ where: [{ user_id: req.body.USER_ID }], relations: ["posts"] })
-    const posts = await Post.find({ where: [{ user_id: 2 }], relations: ["user_id"] })
+
+    const users = await User.findOne({
+      where: { user_id: req.body.USER_ID },
+      relations: ["posts"]
+    })
+
+    const posts = await Post.find({
+      where: { user_id: 2 },
+      relations: ["user_id"]
+    })
+    
     if (users) {
       users
       res.send(posts)
