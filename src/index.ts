@@ -3,6 +3,7 @@ import bodyParser from 'body-parser'
 import 'reflect-metadata';
 import bcrypt from "bcrypt"
 import { User } from './entities/User'
+import { Post } from './entities/Post'
 import { createConnection } from 'typeorm'
 import jwt from "jsonwebtoken"
 import config from "./config"
@@ -146,12 +147,54 @@ createConnection().then(async (connection) => {
   // user一覧を閲覧
   app.get('/api/read', async (req, res) => {
     console.log(req.body.USER_ID)
-    const users = await User.find({
-      delete: false
+    const users = await User.findOne({ where: [{ user_id: req.body.USER_ID }], relations: ["posts"] })
+    const posts = await Post.find({ where: [{ user_id: 2 }], relations: ["user_id"] })
+    if (users) {
+      users
+      res.send(posts)
+    }
+    else {
+      res.send("no such user")
+    }
+  })
+
+  app.get('/api/getpost', async (req, res) => {
+    const USER_ID = req.body.USER_ID
+    const user = await User.findOne({
+      user_id: USER_ID
     })
 
-    if (users) {
-      res.send(users)
+    if (user) {
+      console.log(user.posts)
+      res.json({ posts: user.posts })
+    }
+    else {
+      res.send("no such user")
+    }
+  })
+
+  // テスト投稿
+  app.get('/api/post', async (req, res) => {
+    const USER_ID = req.body.USER_ID
+    const user = await User.findOne({
+      user_id: 2
+    })
+
+    if (user) {
+      const post1 = new Post()
+      post1.title = "タイトル１"
+      post1.user_id = user
+      await Post.save(post1)
+
+      const post2 = new Post()
+      post2.title = "タイトル２"
+      post2.user_id = user
+      await Post.save(post2)
+
+      const posts = await Post.find({ where: [{ user: 2 }], relations: ["user"] })
+      user.posts = [...posts, post1, post2]
+      await User.save(user)
+      res.send("ドヤァ…")
     }
     else {
       res.send("no such user")

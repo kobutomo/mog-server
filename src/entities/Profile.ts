@@ -6,7 +6,7 @@ export class Profile extends BaseEntity {
   public profile_id?: number
 
   @OneToOne(type => User)
-  @JoinColumn()
+  @JoinColumn({ name: "user_id" })
   public user_id: User
 
   @Column()
