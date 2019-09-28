@@ -1,5 +1,5 @@
 import { User } from './src/entities/User'
-import { UserDetail } from './src/entities/UserDetail'
+import { Profile } from './src/entities/Profile'
 import { Post } from './src/entities/Post'
 module.exports = {
   "type": "postgres",
@@ -12,7 +12,7 @@ module.exports = {
   "logging": false,
   "entities": [
     User,
-    UserDetail,
+    Profile,
     Post
   ],
   "migrations": [

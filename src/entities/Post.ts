@@ -1,12 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BaseEntity } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BaseEntity, OneToOne, JoinColumn } from 'typeorm'
+import { User } from "./User";
 
 @Entity()
 export class Post extends BaseEntity {
-	@PrimaryGeneratedColumn()
-	readonly user_id: number
+	@PrimaryGeneratedColumn("increment")
+	readonly post_id?: number
 
-	@Column("increment")
-	public post_id?: number
+	@OneToOne(type => User)
+	@JoinColumn()
+	public user_id: User
 
 	@Column()
 	public title: string
