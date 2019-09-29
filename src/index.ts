@@ -7,6 +7,32 @@ import { Post } from './entities/Post'
 import { createConnection } from 'typeorm'
 import jwt from "jsonwebtoken"
 import config from "./config"
+import * as fs from "fs"
+import multer from "multer"
+import * as path from "path"
+
+const app = express()
+
+const dir = app.get('env') === "development"
+  ? path.resolve("/home/tomoro/projects/mogmogram/public/img/uploads/")
+  : ""
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, dir)
+  },
+  // ファイル名を指定(オリジナルのファイル名を指定)
+  filename: (req, file, cb) => {
+    const date = new Date()
+    const month = date.getMonth() + 1
+    const yy = date.getFullYear()
+    const MM = ('0' + month).slice(-2)
+    const dd = ('0' + date.getDate()).slice(-2)
+    cb(null, `${yy}-${MM}-${dd}-${file.originalname}`)
+  }
+})
+
+const upload = multer({ storage: storage })
 
 // どうしてもtry/catchを書きたくなかった
 const verifyToken = async (token: string, secret: string) => {
@@ -14,13 +40,33 @@ const verifyToken = async (token: string, secret: string) => {
 }
 
 createConnection().then(async (connection) => {
-  const app = express()
 
   app.use(bodyParser.urlencoded({
     extended: true
   }))
   app.use(bodyParser.json())
 
+  // アップロードテスト
+
+  app.post('/api/upload/', upload.single('file'), (req, res) => {
+    const file = req.file
+    const meta = req.body
+    // デッバグのため、アップしたファイルの名前を表示する
+    console.log(file, meta)
+    res.status(200).json({ file: req.file })
+  })
+
+  app.post('/api/upload/delete/', (req, res) => {
+    const file = req.body.filename
+    console.log(file)
+    fs.unlink(path.resolve(dir + file), (err) => {
+      if (err) { res.json({ 'result': 'error' })
+      console.log(err)
+    }
+      else { res.json({ 'result': 'success!' }) }
+    })
+  })
+  
 
   // email被りチェック
   app.post("/api/checkemail/", async (req, res) => {
@@ -146,18 +192,18 @@ createConnection().then(async (connection) => {
 
   // user一覧を閲覧
   app.get('/api/read', async (req, res) => {
-    console.log(req.body.USER_ID)
 
+    const USER_ID = req.body.USER_ID
     const users = await User.findOne({
-      where: { user_id: req.body.USER_ID },
+      where: { user_id: USER_ID },
       relations: ["posts"]
     })
 
     const posts = await Post.find({
-      where: { user_id: 2 },
+      where: { user_id: USER_ID },
       relations: ["user_id"]
     })
-    
+
     if (users) {
       users
       res.send(posts)
