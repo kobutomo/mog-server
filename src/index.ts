@@ -49,16 +49,11 @@ createConnection().then(async (connection) => {
   // アップロードテスト
 
   app.post('/api/upload/', upload.single('file'), (req, res) => {
-    const file = req.file
-    const meta = req.body
-    // デッバグのため、アップしたファイルの名前を表示する
-    console.log(file, meta)
     res.status(200).json({ file: req.file })
   })
 
   app.post('/api/upload/delete/', (req, res) => {
     const file = req.body.filename
-    console.log(file)
     fs.unlink(path.resolve(dir + file), (err) => {
       if (err) { res.json({ 'result': 'error' })
       console.log(err)
