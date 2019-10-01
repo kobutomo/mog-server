@@ -142,30 +142,52 @@ createConnection().then(async (connection) => {
 
   // ログイン処理
   app.post("/api/login/", async (req, res) => {
-    const user = await User.findOne({
-      email: req.body.email
-    })
-    // アカウントが存在したときの処理
-    if (user) {
-      // 暗号化比較
-      const result = await bcrypt.compare(req.body.password, user.password)
-      if (result) {
+
+    const token: string | null = req.body.token || req.query.token || req.headers['x-access-token'];
+
+    // トークン付きのとき（自動ログイン）
+    if (token) {
+      const result: any = await verifyToken(token, config.jwtKey)
+      if (result.USER_ID) {
+        console.log(result.USER_ID)
         // token更新
         const payload = {
-          USER_ID: user.user_id
+          USER_ID: result.USER_ID
         }
         const token = jwt.sign(payload, config.jwtKey, { expiresIn: "1d" })
 
-        res.json({ auth: true, token: token })
+        return res.status(200).json({ auth: true, token: token })
+      } else {
+        return res.status(403).json({ auth: false })
       }
-      // PWが違うとき
+    }
+    // トークン付きじゃないとき（普通のログイン）
+    else {
+      const user = await User.findOne({
+        email: req.body.email
+      })
+      // アカウントが存在したときの処理
+      if (user) {
+        // 暗号化比較
+        const result = await bcrypt.compare(req.body.password, user.password)
+        if (result) {
+          // token更新
+          const payload = {
+            USER_ID: user.user_id
+          }
+          const token = jwt.sign(payload, config.jwtKey, { expiresIn: "1d" })
+
+          res.json({ auth: true, token: token })
+        }
+        // PWが違うとき
+        else {
+          res.json({ auth: false })
+        }
+      }
+      // アカウントが存在しないとき
       else {
         res.json({ auth: false })
       }
-    }
-    // アカウントが存在しないとき
-    else {
-      res.json({ auth: false })
     }
   })
 
