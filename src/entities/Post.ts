@@ -13,23 +13,23 @@ export class Post extends BaseEntity {
 	@Column()
 	public title: string
 
-	// @Column()
-	// public content: string
+	@Column()
+	public content: string
 
-	// @Column("text", { array: true })
-	// public images: string[]
+	@Column("text", { array: true })
+	public images: string[]
 
-	// @Column()
-	// public rating: number
+	@Column()
+	public rating: number
 
-	// @Column("text", { array: true })
-	// public tags: string[]
+	@Column("text", { array: true })
+	public tags: string[]
 
-	// @Column("text")
-	// public location: string
+	@Column("text")
+	public location: string
 
-	// @Column("text")
-	// public location_search: string
+	@Column("text")
+	public location_search: string
 
 	@CreateDateColumn()
 	readonly createdAt?: Date

@@ -196,14 +196,14 @@ createConnection().then(async (connection) => {
   ユーザー認証が必要ないAPIはこれより上に記述しないと弾かれる */
   app.use(async (req, res, next) => {
 
-    const token = req.body.token || req.query.token || req.headers['x-access-token'];
+    const token: string | null = req.body.token || req.query.token || req.headers['x-access-token'];
 
     // トークンがあるかどうか検証
     if (!token) {
       return res.status(403).send({
         success: false,
         message: 'No token provided.'
-      });
+      })
     }
 
     await verifyToken(token, config.jwtKey).then((result: any) => {
@@ -211,6 +211,7 @@ createConnection().then(async (connection) => {
         /* decodeして取得したemailをリクエストbodyに加える
         そうすることで、next()で続くmiddleware上でメールアドレスを使用できる */
         req.body.USER_ID = result.USER_ID
+        console.log("Authentication successed")
         next()
         // メールアドレスを取得できなかったとき
       } else {
@@ -260,12 +261,10 @@ createConnection().then(async (connection) => {
     }
   })
 
-  // テスト投稿
-  app.get('/api/post', async (req, res) => {
-    const USER_ID = req.body.USER_ID
-    const user = await User.findOne({
-      user_id: 2
-    })
+  // アップロードテスト
+  app.post('/api/upload/', upload.single('file'), (req, res) => {
+    res.status(200).json({ file: req.file })
+  })
 
   app.post('/api/upload/delete/', (req, res) => {
     const file = req.body.filename
@@ -274,6 +273,8 @@ createConnection().then(async (connection) => {
         res.status(500).json({ 'result': 'error' })
         console.log(err)
       }
+      else { res.status(200).json({ 'result': 'success!' }) }
+    })
   })
 
   // 接続するたびひとつuserを削除
