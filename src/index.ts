@@ -46,22 +46,44 @@ createConnection().then(async (connection) => {
   }))
   app.use(bodyParser.json())
 
-  // アップロードテスト
+  // デバッグ用
+  app.get('/api/read', async (req, res) => {
 
-  app.post('/api/upload/', upload.single('file'), (req, res) => {
-    res.status(200).json({ file: req.file })
-  })
-
-  app.post('/api/upload/delete/', (req, res) => {
-    const file = req.body.filename
-    fs.unlink(path.resolve(dir + file), (err) => {
-      if (err) { res.json({ 'result': 'error' })
-      console.log(err)
-    }
-      else { res.json({ 'result': 'success!' }) }
+    const USER_ID = 2
+    const users = await User.findOne({
+      where: { user_id: USER_ID },
+      relations: ["posts"]
     })
+
+    const posts = await Post.find({
+      where: { user_id: USER_ID },
+      relations: ["user_id"]
+    })
+
+    if (users) {
+      users
+      res.send(posts)
+    }
+    else {
+      res.send("no such user")
+    }
   })
-  
+
+  app.get('/api/getpost', async (req, res) => {
+    const USER_ID = 2
+    const user = await User.findOne({
+      where: { user_id: USER_ID },
+      relations: ["posts"]
+    })
+
+    if (user) {
+      console.log(user.posts)
+      res.json({ posts: user.posts })
+    }
+    else {
+      res.send("no such user")
+    }
+  })
 
   // email被りチェック
   app.post("/api/checkemail/", async (req, res) => {
@@ -230,25 +252,13 @@ createConnection().then(async (connection) => {
       user_id: 2
     })
 
-    if (user) {
-      const post1 = new Post()
-      post1.title = "タイトル１"
-      post1.user_id = user
-      await Post.save(post1)
-
-      const post2 = new Post()
-      post2.title = "タイトル２"
-      post2.user_id = user
-      await Post.save(post2)
-
-      const posts = await Post.find({ where: [{ user: 2 }], relations: ["user"] })
-      user.posts = [...posts, post1, post2]
-      await User.save(user)
-      res.send("ドヤァ…")
-    }
-    else {
-      res.send("no such user")
-    }
+  app.post('/api/upload/delete/', (req, res) => {
+    const file = req.body.filename
+    fs.unlink(path.resolve(dir + file), (err) => {
+      if (err) {
+        res.status(500).json({ 'result': 'error' })
+        console.log(err)
+      }
   })
 
   // 接続するたびひとつuserを削除
