@@ -207,41 +207,34 @@ createConnection().then(async (connection) => {
   })
 
 
-  // user一覧を閲覧
-  app.get('/api/read', async (req, res) => {
-
-    const USER_ID = req.body.USER_ID
-    const users = await User.findOne({
-      where: { user_id: USER_ID },
-      relations: ["posts"]
-    })
-
-    const posts = await Post.find({
-      where: { user_id: USER_ID },
-      relations: ["user_id"]
-    })
-
-    if (users) {
-      users
-      res.send(posts)
-    }
-    else {
-      res.send("no such user")
-    }
-  })
-
-  app.get('/api/getpost', async (req, res) => {
+  // テスト投稿
+  app.post('/api/post', async (req, res) => {
     const USER_ID = req.body.USER_ID
     const user = await User.findOne({
       user_id: USER_ID
     })
 
     if (user) {
-      console.log(user.posts)
-      res.json({ posts: user.posts })
+      console.log(req.body)
+      const post = new Post()
+      post.user_id = user
+      post.title = req.body.title
+      post.content = req.body.content
+      post.images = req.body.images
+      post.rating = req.body.rating
+      post.tags = req.body.tags
+      post.location = req.body.location
+      post.location_search = req.body.locationSearch
+
+      await Post.save(post)
+
+      // const posts = await Post.find({ where: [{ user: 2 }], relations: ["user"] })
+      // // user.posts = [...posts, post1]
+      // // await User.save(user)
+      res.status(200).json({sucsess:true})
     }
     else {
-      res.send("no such user")
+      res.status(500).json({ sucsess: false })
     }
   })
 
