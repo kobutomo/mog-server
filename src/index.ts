@@ -34,6 +34,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
+type UserRelations = ("post" | "profile")[]
+
+type PostRelations = "user_id"[]
 // どうしてもtry/catchを書きたくなかった
 const verifyToken = async (token: string, secret: string) => {
   return jwt.verify(token, secret)
@@ -50,22 +53,48 @@ createConnection().then(async (connection) => {
   app.get('/api/read', async (req, res) => {
 
     const USER_ID = 1
-    const users = await User.findOne({
-      where: { user_id: USER_ID },
-      relations: ["posts"]
-    })
 
-    const posts = await Post.find({
-      where: { user_id: USER_ID },
-      relations: ["user_id"]
-    })
+    const postRelations: PostRelations = ["user_id"]
 
-    if (users) {
-      res.send(posts)
+    const postSearchOptions = {
+      where: { user_id: USER_ID },
+      relations: postRelations
     }
-    else {
-      res.send("no such user")
+
+    const posts = await Post.find(postSearchOptions)
+      .catch(err => () => {
+        console.log(err)
+        return false
+      })
+
+    // ポストが空のとき
+    if (posts instanceof Array && posts[0] === undefined) {
+      const response = {
+        success: true,
+        hasPost: false,
+        posts: posts
+      }
+      return res.status(200).json(response)
     }
+
+    // ポストが空じゃないとき
+    if (posts instanceof Array) {
+      const response = {
+        success: true,
+        hasPost: true,
+        posts: posts
+      }
+      return res.status(200).json(response)
+    }
+
+    // ポストの取得に失敗したとき
+    posts()
+    const response = {
+      success: false,
+      hasPost: true,
+      posts: []
+    }
+    return res.status(500).json(response)
   })
 
   // 記事取得
