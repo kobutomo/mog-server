@@ -68,20 +68,9 @@ createConnection().then(async (connection) => {
       })
 
     // ポストが空のとき
-    if (posts instanceof Array && posts[0] === undefined) {
-      const response = {
-        success: true,
-        hasPost: false,
-        posts: posts
-      }
-      return res.status(200).json(response)
-    }
-
-    // ポストが空じゃないとき
     if (posts instanceof Array) {
       const response = {
         success: true,
-        hasPost: true,
         posts: posts
       }
       return res.status(200).json(response)
