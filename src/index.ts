@@ -49,7 +49,7 @@ createConnection().then(async (connection) => {
   // デバッグ用
   app.get('/api/read', async (req, res) => {
 
-    const USER_ID = 2
+    const USER_ID = 1
     const users = await User.findOne({
       where: { user_id: USER_ID },
       relations: ["posts"]
@@ -61,12 +61,17 @@ createConnection().then(async (connection) => {
     })
 
     if (users) {
-      users
       res.send(posts)
     }
     else {
       res.send("no such user")
     }
+  })
+
+  // 記事取得
+  app.get("/api/post/", async (req, res) => {
+    const posts = await Post.find({ delete: false })
+    res.status(200).send(posts)
   })
 
   app.get('/api/getpost', async (req, res) => {
@@ -238,7 +243,6 @@ createConnection().then(async (connection) => {
     })
 
     if (user) {
-      console.log(req.body)
       const post = new Post()
       post.user_id = user
       post.title = req.body.title
@@ -254,7 +258,8 @@ createConnection().then(async (connection) => {
       // const posts = await Post.find({ where: [{ user: 2 }], relations: ["user"] })
       // // user.posts = [...posts, post1]
       // // await User.save(user)
-      res.status(200).json({sucsess:true})
+      res.status(200).json({ sucsess: true })
+      console.log("post a post")
     }
     else {
       res.status(500).json({ sucsess: false })
@@ -279,13 +284,19 @@ createConnection().then(async (connection) => {
 
   // 接続するたびひとつuserを削除
   app.get('/api/delete', async (req, res) => {
-    const user = await User.findOne({})
-    if (user) {
-      user.delete = true
-      await User.save(user)
-      res.send(user)
+    const USER_ID = req.body.USER_ID
+    const post = await Post.findOne({
+      where: { user_id: USER_ID, delete: false },
+      relations: ["user_id"]
+    })
+    if (post) {
+      post.delete = true
+      await Post.save(post)
+      res.status(200).json({ success: true })
+      console.log("delete a post")
     }
     else {
+      console.log("no post")
       res.send("no such user")
     }
   })
